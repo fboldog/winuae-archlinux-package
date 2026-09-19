@@ -19,7 +19,6 @@ depends=('qt6-base' 'sdl3' 'libpcap' 'libmpeg2' 'jack2' 'libbpf' 'libepoxy' 'lib
 makedepends=('cmake' 'git' 'gcc' 'bash' 'curl' 'tar' 'patch' 'coreutils' 'ninja')
 provides=('winuae-unix')
 conflicts=('winuae-unix')
-options=('!debug')
 source=(
 	"${pkgname}::git+https://github.com/reinauer/WinUAE#branch=back-to-the-roots"
 	"qemu-uae::git+https://github.com/reinauer/uae-ppc-plugin#branch=main"
