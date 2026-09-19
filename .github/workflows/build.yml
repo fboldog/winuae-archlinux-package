@@ -1,0 +1,45 @@
+name: Build Arch Linux package
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Install Arch Linux build tools
+        shell: bash
+        run: |
+          pacman --sync --refresh --sysupgrade --noconfirm
+          pacman --sync --needed --noconfirm base-devel git sudo
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Create unprivileged build user
+        shell: bash
+        run: |
+          useradd --create-home builder
+          printf '%s\n' 'builder ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman' \
+            > /etc/sudoers.d/builder
+          chmod 0440 /etc/sudoers.d/builder
+          chown --recursive builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Build package
+        shell: bash
+        run: runuser --user builder -- makepkg --syncdeps --needed --noconfirm --cleanbuild --clean
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: winuae-archlinux-package
+          path: ./*.pkg.tar.*
+          if-no-files-found: error
